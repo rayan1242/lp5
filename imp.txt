@@ -1,0 +1,2 @@
+curl  https://raw.githubusercontent.com/inciner8r/lp6/main/readme
+bfsdfs.cpp  bubble.cpp  merge.cpp stats.cpp
