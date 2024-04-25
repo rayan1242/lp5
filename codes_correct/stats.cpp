@@ -132,7 +132,7 @@ int main(int argc, const char **argv)
     
     cout << "length of the array ";
     cin >> n;
-    cout << "max element ";
+    cout << "Range of the Array -  ";
     cin >> rand_max;
     
     a = new int[n];
