@@ -1,70 +1,65 @@
-#include<iostream>
-#include<omp.h>
+#include <iostream>
+#include <vector>
+#include <cstdlib>  // For rand()
+#include <ctime>    // For clock()
+#include <omp.h>    // OpenMP
 
-using namespace std;
-
-void bubble(int array[], int n){
-    for (int i = 0; i < n - 1; i++){
-        for (int j = 0; j < n - i - 1; j++){
-            if (array[j] > array[j + 1]) swap(array[j], array[j + 1]);
+// Sequential Bubble Sort
+void bubbleSortSequential(int* arr, int size) {
+    for (int i = 0; i < size - 1; i++) {
+        for (int j = 0; j < size - i - 1; j++) {
+            if (arr[j] > arr[j + 1]) {
+                int temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = temp;
+            }
         }
     }
 }
 
-void pBubble(int array[], int n){
-    //Sort odd indexed numbers
-    for(int i = 0; i < n; ++i){    
-        #pragma omp for
-        for (int j = 1; j < n; j += 2){
-        if (array[j] < array[j-1])
-        {
-          swap(array[j], array[j - 1]);
+// Parallel Bubble Sort using OpenMP
+void bubbleSortParallel(int* arr, int size) {
+    #pragma omp parallel for
+    for (int i = 0; i < size - 1; i++) {
+        for (int j = 0; j < size - i - 1; j++) {
+            if (arr[j] > arr[j + 1]) {
+                int temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = temp;
+            }
         }
     }
+}
 
-    // Synchronize
-    #pragma omp barrier
-
-    //Sort even indexed numbers
-    #pragma omp for
-    for (int j = 2; j < n; j += 2){
-      if (array[j] < array[j-1])
-      {
-        swap(array[j], array[j - 1]);
-      }
+int main() {
+//    const int size = 10000;
+    int size;
+    std::cout << "Enter the array size : ";
+    std::cin >> size;
+    int arr[size];
+    for (int i = 0; i < size; i++) {
+        arr[i] = rand() % 1000;  // Random numbers between 0 and 999
     }
-  }
+
+    // Measure sequential bubble sort time
+    clock_t startSeqBubble = clock();
+    bubbleSortSequential(arr, size);
+    clock_t endSeqBubble = clock();
+    double timeSeqBubble = double(endSeqBubble - startSeqBubble) / CLOCKS_PER_SEC;
+
+    // Measure parallel bubble sort time
+    clock_t startParBubble = clock();
+    bubbleSortParallel(arr, size);
+    clock_t endParBubble = clock();
+    double timeParBubble = double(endParBubble - startParBubble) / CLOCKS_PER_SEC;
+
+    // Print execution times
+    std::cout << "Sequential Bubble Sort Time: " << timeSeqBubble << " seconds" << std::endl;
+    std::cout << "Parallel Bubble Sort Time: " << timeParBubble << " seconds" << std::endl;
+    
+    for (int i = 0; i < size; i++) {
+        std::cout<<arr[i]<<" ";  // Random numbers between 0 and 999
+    }
+
+    return 0;
 }
-
-void printArray(int arr[], int n){
-    for(int i = 0; i < n; i++) cout << arr[i] << " ";
-    cout << "\n";
-}
-
-int main(){
-    // Set up variables
-    int n = 500;
-    int arr[n];
-    int brr[n];
-    double start_time, end_time;
-
-    // Create an array with numbers starting from n to 1
-    for(int i = 0, j = n; i < n; i++, j--) arr[i] = j;
-    
-    // Sequential time
-    start_time = omp_get_wtime();
-    bubble(arr, n);
-    end_time = omp_get_wtime();     
-    cout << "Sequential Bubble Sort took : " << end_time - start_time << " seconds.\n";
-    printArray(arr, n);
-    
-    // Reset the array
-    for(int i = 0, j = n; i < n; i++, j--) arr[i] = j;
-    
-    // Parallel time
-    start_time = omp_get_wtime();
-    pBubble(arr, n);
-    end_time = omp_get_wtime();     
-    cout << "Parallel Bubble Sort took : " << end_time - start_time << " seconds.\n";
-    printArray(arr, n);
-}   
